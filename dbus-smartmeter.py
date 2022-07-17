@@ -245,21 +245,21 @@ class DbusSmartmeterService:
           meterData = self.meter.getMeterData()
 
           # positive: consumption, negative: feed into grid
-          self._dbusservice['/Ac/Power'] = meterData["power_active"]
+          self._dbusservice['/Ac/Power'] = round(meterData["power_active"], 2)
           self._dbusservice['/Ac/L1/Voltage'] = 0
           self._dbusservice['/Ac/L2/Voltage'] = 0
           self._dbusservice['/Ac/L3/Voltage'] = 0
           self._dbusservice['/Ac/L1/Current'] = 0
           self._dbusservice['/Ac/L2/Current'] = 0
           self._dbusservice['/Ac/L3/Current'] = 0
-          self._dbusservice['/Ac/L1/Power'] = meterData["l1_power_active"]
-          self._dbusservice['/Ac/L2/Power'] = meterData["l2_power_active"]
-          self._dbusservice['/Ac/L3/Power'] = meterData["l3_power_active"]
-          self._dbusservice['/Ac/Energy/Forward'] = meterData["import_energy_active"]
+          self._dbusservice['/Ac/L1/Power'] = round(meterData["l1_power_active"], 2)
+          self._dbusservice['/Ac/L2/Power'] = round(meterData["l2_power_active"], 2)
+          self._dbusservice['/Ac/L3/Power'] = round(meterData["l3_power_active"], 2)
+          self._dbusservice['/Ac/Energy/Forward'] = round(meterData["import_energy_active"] / 1000.0, 2)
           self._dbusservice['/Ac/Energy/Reverse'] = 0
-          self._dbusservice['/Ac/L1/Energy/Forward'] = meterData["l1_import_energy_active"]
-          self._dbusservice['/Ac/L2/Energy/Forward'] = meterData["l2_import_energy_active"]
-          self._dbusservice['/Ac/L3/Energy/Forward'] = meterData["l3_import_energy_active"]
+          self._dbusservice['/Ac/L1/Energy/Forward'] = round(meterData["l1_import_energy_active"] / 1000.0, 2)
+          self._dbusservice['/Ac/L2/Energy/Forward'] = round(meterData["l2_import_energy_active"] / 1000.0, 2)
+          self._dbusservice['/Ac/L3/Energy/Forward'] = round(meterData["l3_import_energy_active"] / 1000.0, 2)
           self._dbusservice['/Ac/L1/Energy/Reverse'] = 0
           self._dbusservice['/Ac/L2/Energy/Reverse'] = 0
           self._dbusservice['/Ac/L3/Energy/Reverse'] = 0
