@@ -1,0 +1,4 @@
+bitstring>=3.1.9
+async_timeout>=4.0.2
+pyserial>=3.4
+pysml>=0.0.8
