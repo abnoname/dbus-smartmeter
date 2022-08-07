@@ -151,7 +151,7 @@ class SmlReader(Thread):
                         self.errorPower = self.errorPower - 50
                 else:
                     if(self.errorPower < 0):
-                        self.errorPower = self.errorPower + 50
+                        self.errorPower = 0 #self.errorPower + 50
                 if(self.errorPower < 0):
                     val["value"] = self.errorPower
 
@@ -217,6 +217,7 @@ class DbusSmartmeterService:
         self._dbusservice.add_path('/Model', 'EM24DINAV23XE1X')
         self._dbusservice.add_path('/Serial', 'MB24DINAV23XE1')
         self._dbusservice.add_path('/Role', 'grid')
+        self._dbusservice.add_path('/Latency', 1)
         self._dbusservice.add_path('/ProductId', 45079)
         self._dbusservice.add_path('/ProductName', 'Carlo Gavazzi EM24 Ethernet Energy Meter')
         self._dbusservice.add_path('/FirmwareVersion', 65567)
