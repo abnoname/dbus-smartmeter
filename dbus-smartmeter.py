@@ -59,6 +59,7 @@ class SmlReader(Thread):
     def __init__(self):
         Thread.__init__(self)
         self.dev = ""
+        self.errorPower = 0
         self.running = True
         self.terminateOnTimeout = 0
         self.smlTimeoutSec = 5
@@ -145,10 +146,19 @@ class SmlReader(Thread):
                 self.meterData["l2_import_energy_active"] = val["value"] / 3.0
                 self.meterData["l3_import_energy_active"] = val["value"] / 3.0
             if('1-0:16.7.0*255' in val["objName"]):
-                self.meterData["power_active"] = -1 * val["value"]
-                self.meterData["l1_power_active"] = -1 * val["value"] / 3.0
-                self.meterData["l2_power_active"] = -1 * val["value"] / 3.0
-                self.meterData["l3_power_active"] = -1 * val["value"] / 3.0
+                if(val["value"] < 1):
+                    if(self.errorPower > -1000):
+                        self.errorPower = self.errorPower - 50
+                else:
+                    if(self.errorPower < 0):
+                        self.errorPower = self.errorPower + 50
+                if(self.errorPower < 0):
+                    val["value"] = self.errorPower
+
+                self.meterData["power_active"] = +1 * val["value"]
+                self.meterData["l1_power_active"] = +1 * val["value"] / 3.0
+                self.meterData["l2_power_active"] = +1 * val["value"] / 3.0
+                self.meterData["l3_power_active"] = +1 * val["value"] / 3.0
 
     def run(self):
         while self.running == True:
@@ -188,7 +198,7 @@ class SmlReader(Thread):
                     ser.close()
 
 class DbusSmartmeterService:
-    def __init__(self, servicename, deviceinstance, productname='SML Smart Meter', connection='SML Smart Meter service', smlreader=SmlReader()):
+    def __init__(self, servicename, deviceinstance, productname='', connection='', smlreader=SmlReader()):
         self._dbusservice = VeDbusService(servicename)
         self.meter = smlreader
 
@@ -199,21 +209,26 @@ class DbusSmartmeterService:
         self._dbusservice.add_path('/Mgmt/ProcessName', __file__)
         self._dbusservice.add_path(
             '/Mgmt/ProcessVersion', 'Unkown version, and running on Python ' + platform.python_version())
-        self._dbusservice.add_path('/Mgmt/Connection', connection)
+        self._dbusservice.add_path('/Mgmt/Connection', 'SML Smart Meter service')
 
         # Create the mandatory objects
         self._dbusservice.add_path('/DeviceInstance', deviceinstance)
         # value used in ac_sensor_bridge.cpp of dbus-cgwacs
-        self._dbusservice.add_path('/ProductId', 16)
-        self._dbusservice.add_path('/ProductName', productname)
-        self._dbusservice.add_path('/FirmwareVersion', 0.1)
-        self._dbusservice.add_path('/HardwareVersion', 0)
+        self._dbusservice.add_path('/Model', 'EM24DINAV23XE1X')
+        self._dbusservice.add_path('/Serial', 'MB24DINAV23XE1')
+        self._dbusservice.add_path('/Role', 'grid')
+        self._dbusservice.add_path('/ProductId', 45079)
+        self._dbusservice.add_path('/ProductName', 'Carlo Gavazzi EM24 Ethernet Energy Meter')
+        self._dbusservice.add_path('/FirmwareVersion', 65567)
+        self._dbusservice.add_path('/HardwareVersion', 65566)
         self._dbusservice.add_path('/Connected', 1)
+        self._dbusservice.add_path('/Position', 0) # normaly only needed for pvinverter
 
-        _kwh = lambda p, v: (str(v) + 'KWh')
-        _a = lambda p, v: (str(v) + 'A')
-        _w = lambda p, v: (str(v) + 'W')
-        _v = lambda p, v: (str(v) + 'V')
+        #formatting
+        _kwh = lambda p, v: (str(round(v, 2)) + 'KWh')
+        _a = lambda p, v: (str(round(v, 1)) + 'A')
+        _w = lambda p, v: (str(round(v, 1)) + 'W')
+        _v = lambda p, v: (str(round(v, 1)) + 'V')
 
         self._dbusservice.add_path('/Ac/Energy/Forward', None, gettextcallback=_kwh)
         self._dbusservice.add_path('/Ac/Energy/Reverse', None, gettextcallback=_kwh)
@@ -306,8 +321,8 @@ def main():
     DBusGMainLoop(set_as_default=True)
 
     pvac_output = DbusSmartmeterService(
-      servicename='com.victronenergy.grid',
-      deviceinstance=0,
+      servicename='com.victronenergy.grid.ha1',
+      deviceinstance=40,
       smlreader=device
     )
 
