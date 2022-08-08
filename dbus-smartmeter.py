@@ -147,11 +147,23 @@ class SmlReader(Thread):
                 self.meterData["l3_import_energy_active"] = val["value"] / 3.0
             if('1-0:16.7.0*255' in val["objName"]):
                 if(val["value"] < 1):
+                    # simulate negative progressive power if value stays at P=0
                     if(self.errorPower > -1000):
-                        self.errorPower = self.errorPower - 50
+                        if(self.errorPower > -5):
+                            step = 1
+                        elif(self.errorPower > -25):
+                            step = 5
+                        elif(self.errorPower > -50):
+                            step = 50
+                        elif(self.errorPower > -200):
+                            step = 100
+                        elif(self.errorPower > -500):
+                            step = 500
+                        self.errorPower = self.errorPower - step
                 else:
                     if(self.errorPower < 0):
-                        self.errorPower = 0 #self.errorPower + 50
+                        self.errorPower = 0 # reset instant to real value
+
                 if(self.errorPower < 0):
                     val["value"] = self.errorPower
 
@@ -214,14 +226,14 @@ class DbusSmartmeterService:
         # Create the mandatory objects
         self._dbusservice.add_path('/DeviceInstance', deviceinstance)
         # value used in ac_sensor_bridge.cpp of dbus-cgwacs
-        self._dbusservice.add_path('/Model', 'EM24DINAV23XE1X')
-        self._dbusservice.add_path('/Serial', 'MB24DINAV23XE1')
+        self._dbusservice.add_path('/Model', 'SML')
+        self._dbusservice.add_path('/Serial', 'SML00000')
         self._dbusservice.add_path('/Role', 'grid')
-        self._dbusservice.add_path('/Latency', 1)
-        self._dbusservice.add_path('/ProductId', 45079)
-        self._dbusservice.add_path('/ProductName', 'Carlo Gavazzi EM24 Ethernet Energy Meter')
-        self._dbusservice.add_path('/FirmwareVersion', 65567)
-        self._dbusservice.add_path('/HardwareVersion', 65566)
+        self._dbusservice.add_path('/Latency', 2)
+        self._dbusservice.add_path('/ProductId', 16)
+        self._dbusservice.add_path('/ProductName', 'SML Smart Meter')
+        self._dbusservice.add_path('/FirmwareVersion', 0.1)
+        self._dbusservice.add_path('/HardwareVersion', 0)
         self._dbusservice.add_path('/Connected', 1)
         self._dbusservice.add_path('/Position', 0) # normaly only needed for pvinverter
 
@@ -252,8 +264,8 @@ class DbusSmartmeterService:
         self._dbusservice.add_path(path_UpdateIndex, None)
         self._dbusservice[path_UpdateIndex] = 0
 
-        # pause 200ms before the next request
-        gobject.timeout_add(200, self._update)
+        # pause 1000ms before the next request
+        gobject.timeout_add(1000, self._update)
 
     def _update(self):
         try:
