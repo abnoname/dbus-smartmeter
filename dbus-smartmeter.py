@@ -148,7 +148,7 @@ class SmlReader(Thread):
             if('1-0:16.7.0*255' in val["objName"]):
                 if(val["value"] < 1):
                     # simulate negative progressive power if value stays at P=0
-                    if(self.errorPower > -3500):
+                    if(self.errorPower > -5500):
                         if(self.errorPower > -5):
                             step = 1
                         elif(self.errorPower > -25):
