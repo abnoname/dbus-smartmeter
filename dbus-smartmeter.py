@@ -148,22 +148,21 @@ class SmlReader(Thread):
             if('1-0:16.7.0*255' in val["objName"]):
                 if(val["value"] < 1):
                     # simulate negative progressive power if value stays at P=0
-                    if(self.errorPower > -5500):
+                    if(self.errorPower > -3000):
                         if(self.errorPower > -5):
-                            step = 1
-                        elif(self.errorPower > -25):
-                            step = 5
-                        elif(self.errorPower > -50):
-                            step = 50
+                            step = 2	# 0 .. 4
+                        elif(self.errorPower > -10):
+                            step = 5	# 5 .. 9
                         elif(self.errorPower > -200):
-                            step = 100
-                        elif(self.errorPower > -500):
+                            step = 100	# 10 .. 199
+                        else:
                             step = 500
                         self.errorPower = self.errorPower - step
                 else:
-                    if(self.errorPower < 0):
-                        self.errorPower = 0 # reset instant to real value
-
+                    # return power
+                    self.errorPower = 0
+                
+                # only synthetic values below zero:
                 if(self.errorPower < 0):
                     val["value"] = self.errorPower
 
@@ -264,8 +263,8 @@ class DbusSmartmeterService:
         self._dbusservice.add_path(path_UpdateIndex, None)
         self._dbusservice[path_UpdateIndex] = 0
 
-        # pause 1000ms before the next request
-        gobject.timeout_add(1000, self._update)
+        # pause 200ms before the next request
+        gobject.timeout_add(200, self._update)
 
     def _update(self):
         try:
@@ -325,7 +324,7 @@ def main():
     device.running = True
     device.dev = devpath
     device.terminateOnTimeout = 1
-    device.smlTimeoutSec = 5
+    device.smlTimeoutSec = 25
 
     # Start the thread
     device.start()
