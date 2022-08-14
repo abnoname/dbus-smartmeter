@@ -150,13 +150,13 @@ class SmlReader(Thread):
                     # simulate negative progressive power if value stays at P=0
                     if(self.errorPower > -3000):
                         if(self.errorPower > -5):
-                            step = 2	# 0 .. 4
+                            step = 1	# 0 .. 4
                         elif(self.errorPower > -10):
                             step = 5	# 5 .. 9
                         elif(self.errorPower > -200):
-                            step = 100	# 10 .. 199
+                            step = 50	# 10 .. 199
                         else:
-                            step = 500
+                            step = 200
                         self.errorPower = self.errorPower - step
                 else:
                     # return power
