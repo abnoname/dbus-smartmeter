@@ -146,30 +146,30 @@ class SmlReader(Thread):
                 self.meterData["l2_import_energy_active"] = val["value"] / 3.0
                 self.meterData["l3_import_energy_active"] = val["value"] / 3.0
             if('1-0:16.7.0*255' in val["objName"]):
-                if(val["value"] < 1):
-                    # simulate negative progressive power if value stays at P=0
-                    if(self.errorPower > -3000):
-                        if(self.errorPower > -5):
-                            step = 1	# 0 .. 4
-                        elif(self.errorPower > -10):
-                            step = 5	# 5 .. 9
-                        elif(self.errorPower > -200):
-                            step = 50	# 10 .. 199
-                        else:
-                            step = 200
-                        self.errorPower = self.errorPower - step
-                else:
-                    # return power
-                    self.errorPower = 0
+                #if(val["value"] < 1):
+                #    # simulate negative progressive power if value stays at P=0
+                #    if(self.errorPower > -3000):
+                #        if(self.errorPower > -5):
+                #            step = 1	# 0 .. 4
+                #        elif(self.errorPower > -10):
+                #            step = 5	# 5 .. 9
+                #        elif(self.errorPower > -200):
+                #            step = 50	# 10 .. 199
+                #        else:
+                #            step = 200
+                #        self.errorPower = self.errorPower - step
+                #else:
+                #    # return power
+                #    self.errorPower = 0
                 
                 # only synthetic values below zero:
-                if(self.errorPower < 0):
-                    val["value"] = self.errorPower
+                #if(self.errorPower < 0):
+                #    val["value"] = self.errorPower
 
                 self.meterData["power_active"] = +1 * val["value"]
-                self.meterData["l1_power_active"] = +1 * val["value"] / 3.0
-                self.meterData["l2_power_active"] = +1 * val["value"] / 3.0
-                self.meterData["l3_power_active"] = +1 * val["value"] / 3.0
+                self.meterData["l1_power_active"] = +1 * val["value"] / 1.0
+                self.meterData["l2_power_active"] = 0 # +1 * val["value"] / 3.0
+                self.meterData["l3_power_active"] = 0 # +1 * val["value"] / 3.0
 
     def run(self):
         while self.running == True:
